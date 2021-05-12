@@ -3,9 +3,9 @@ package plugin
 import (
 	"context"
 
-	comm "github.com/outblocks/outblocks-plugin-go"
+	plugin_go "github.com/outblocks/outblocks-plugin-go"
 )
 
-func (p *Plugin) Start(ctx context.Context, r *comm.StartRequest) (comm.Response, error) {
-	return &comm.EmptyResponse{}, nil
+func (p *Plugin) Start(ctx context.Context, r *plugin_go.StartRequest) (plugin_go.Response, error) {
+	return &plugin_go.EmptyResponse{}, nil
 }
