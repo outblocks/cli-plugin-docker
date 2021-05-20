@@ -11,10 +11,10 @@ type Plugin struct {
 	env env.Enver
 }
 
-func NewPlugin(log log.Logger, env env.Enver) *Plugin {
+func NewPlugin(logger log.Logger, enver env.Enver) *Plugin {
 	return &Plugin{
-		log: log,
-		env: env,
+		log: logger,
+		env: enver,
 	}
 }
 

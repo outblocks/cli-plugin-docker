@@ -8,5 +8,9 @@ import (
 func main() {
 	s := plugin_go.NewServer()
 	p := plugin.NewPlugin(s.Log(), s.Env())
-	s.Start(p.Handler())
+
+	err := s.Start(p.Handler())
+	if err != nil {
+		s.Log().Errorln(err)
+	}
 }
