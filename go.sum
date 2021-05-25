@@ -1,3 +1,3 @@
-github.com/outblocks/outblocks-plugin-go v0.0.0-20210524163350-69483e962749 h1:X/uwbr+TUFP0BVSNDuVs97eCnrN/wmhkW1CN1y3CPd8=
-github.com/outblocks/outblocks-plugin-go v0.0.0-20210524163350-69483e962749/go.mod h1:vAn4Vv7fXTyrjNEvAVcKtKJ2Bwaqk3Oy63lqnBRIct4=
+github.com/outblocks/outblocks-plugin-go v0.0.0-20210525204429-0fc30a0025c8 h1:NL5D4GA+8AdRZkRo/lAwc1nOC06WFps9bhsHIQNqO4Q=
+github.com/outblocks/outblocks-plugin-go v0.0.0-20210525204429-0fc30a0025c8/go.mod h1:vAn4Vv7fXTyrjNEvAVcKtKJ2Bwaqk3Oy63lqnBRIct4=
 golang.org/x/sync v0.0.0-20210220032951-036812b2e83c/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
