@@ -1,10 +1,10 @@
 name: gcp
 author: outblocks
-usage: Preview helm upgrade changes as a diff
-description: Preview helm upgrade changes as a diff
+usage: Docker run plugin
+description: Run whole stack locally through docker containers
 run: $OUTBLOCKS_PLUGIN_DIR/docker_plugin
 actions:
-  - deploy
+  - run
 state_types:
   - gcp
 supports:
