@@ -14,3 +14,5 @@ supports:
 supported_types:
   - type: postgresql
   - type: storage
+    match:
+      deploy: gcp
