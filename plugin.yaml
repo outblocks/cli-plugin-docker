@@ -1,4 +1,4 @@
-name: gcp
+name: docker
 author: outblocks
 usage: Docker run plugin
 description: Run whole stack locally through docker containers
