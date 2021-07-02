@@ -5,8 +5,6 @@ description: Run whole stack locally through docker containers
 run: $OUTBLOCKS_PLUGIN_DIR/docker_plugin
 actions:
   - run
-state_types:
-  - gcp
 supports:
   - function
   - service
