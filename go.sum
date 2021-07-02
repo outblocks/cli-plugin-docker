@@ -1,3 +1,15 @@
-github.com/outblocks/outblocks-plugin-go v0.0.0-20210604162744-b283a68f2c09 h1:lJJGXVamRR4NgPOiPT42JB1BbE3qDkSPP1/RlAqrgDU=
-github.com/outblocks/outblocks-plugin-go v0.0.0-20210604162744-b283a68f2c09/go.mod h1:vAn4Vv7fXTyrjNEvAVcKtKJ2Bwaqk3Oy63lqnBRIct4=
+github.com/outblocks/outblocks-plugin-go v0.0.0-20210622225654-fa25097cc211 h1:iirj9NKMwTNv3o3KSirE2lL98XAGro9D2HeyXCOz+yY=
+github.com/outblocks/outblocks-plugin-go v0.0.0-20210622225654-fa25097cc211/go.mod h1:vAn4Vv7fXTyrjNEvAVcKtKJ2Bwaqk3Oy63lqnBRIct4=
+github.com/outblocks/outblocks-plugin-go v0.0.0-20210623140552-2cf02b83ce52 h1:6G4QfBmMQ2kMZsM0yvR4DDcpl2rOAwDRfNDIGi70uBU=
+github.com/outblocks/outblocks-plugin-go v0.0.0-20210623140552-2cf02b83ce52/go.mod h1:vAn4Vv7fXTyrjNEvAVcKtKJ2Bwaqk3Oy63lqnBRIct4=
+github.com/outblocks/outblocks-plugin-go v0.0.0-20210623144904-10385fe4b0b7 h1:g9wYHiUpSNFy09hozz0b1g2gcCQPhdroF88z/KqyJhg=
+github.com/outblocks/outblocks-plugin-go v0.0.0-20210623144904-10385fe4b0b7/go.mod h1:vAn4Vv7fXTyrjNEvAVcKtKJ2Bwaqk3Oy63lqnBRIct4=
+github.com/outblocks/outblocks-plugin-go v0.0.0-20210623204626-7c3e2182d0d8 h1:2DBN2ogbTil/3gk6AE3Kt8cwnq0XOEnCnUcxG8/ItW4=
+github.com/outblocks/outblocks-plugin-go v0.0.0-20210623204626-7c3e2182d0d8/go.mod h1:vAn4Vv7fXTyrjNEvAVcKtKJ2Bwaqk3Oy63lqnBRIct4=
+github.com/outblocks/outblocks-plugin-go v0.0.0-20210625150224-146698ea116e h1:+rOUvan6Z0iFPhbi4LFVsi8wFxFcJ93A5zs97sSEu6k=
+github.com/outblocks/outblocks-plugin-go v0.0.0-20210625150224-146698ea116e/go.mod h1:vAn4Vv7fXTyrjNEvAVcKtKJ2Bwaqk3Oy63lqnBRIct4=
+github.com/outblocks/outblocks-plugin-go v0.0.0-20210625234204-d7f37de03196 h1:Op7wxGt7YzJ68J2uDR6eDaBn5KNMRmudeyqNKDQBT+g=
+github.com/outblocks/outblocks-plugin-go v0.0.0-20210625234204-d7f37de03196/go.mod h1:vAn4Vv7fXTyrjNEvAVcKtKJ2Bwaqk3Oy63lqnBRIct4=
+github.com/outblocks/outblocks-plugin-go v0.0.0-20210630200127-298dfde78363 h1:VOo9ZghpuwxBBQDhdpU/8k8Xj9P67EllHYedvcRHg0s=
+github.com/outblocks/outblocks-plugin-go v0.0.0-20210630200127-298dfde78363/go.mod h1:vAn4Vv7fXTyrjNEvAVcKtKJ2Bwaqk3Oy63lqnBRIct4=
 golang.org/x/sync v0.0.0-20210220032951-036812b2e83c/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
