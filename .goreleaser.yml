@@ -1,15 +1,15 @@
-project_name: cli-gcp-plugin
+project_name: cli-plugin-docker
 
 release:
   github:
     owner: outblocks
-    name: cli-gcp-plugin
+    name: cli-plugin-docker
 
 before:
   hooks:
     - go mod download
 builds:
-  - binary: ok
+  - binary: docker_plugin
     goos:
       - darwin
       - linux
