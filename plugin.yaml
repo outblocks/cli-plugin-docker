@@ -2,7 +2,9 @@ name: docker
 author: outblocks
 usage: Docker run plugin
 description: Run whole stack locally through docker containers
-run: $OUTBLOCKS_PLUGIN_DIR/docker_plugin
+cmd:
+  default: $OUTBLOCKS_PLUGIN_DIR/docker_plugin
+  windows: $OUTBLOCKS_PLUGIN_DIR/docker_plugin.exe
 actions:
   - run
 supports:
