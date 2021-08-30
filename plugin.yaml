@@ -7,6 +7,19 @@ cmd:
   windows: $OUTBLOCKS_PLUGIN_DIR/docker_plugin.exe
 actions:
   - run
+commands:
+  run:
+    args:
+      - name: docker-regenerate
+        type: bool
+        usage: Regenerate dockerfile and docker-compose files.
+      - name: docker-rebuild
+        type: bool
+        usage: Rebuild docker images.
+      - name: docker-no-cache
+        type: bool
+        usage: Skip cache when rebuilding docker images.
+
 supports:
   - function
   - service
