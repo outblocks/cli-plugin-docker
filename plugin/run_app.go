@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"regexp"
+	"strings"
 	"text/template"
 
 	"github.com/outblocks/cli-plugin-docker/templates"
@@ -84,6 +85,21 @@ func (a *AppRun) Volumes() map[string]string {
 	return map[string]string{
 		a.Name() + "_node_modules": a.DockerPath() + "/node_modules",
 	}
+}
+
+func (a *AppRun) Env() map[string]string {
+	prefix := a.EnvPrefix()
+	m := make(map[string]string)
+
+	for k, v := range a.AppRun.Env {
+		if strings.HasPrefix(k, prefix) {
+			continue
+		}
+
+		m[k] = v
+	}
+
+	return m
 }
 
 func (a *AppRun) DockerCommand() string {

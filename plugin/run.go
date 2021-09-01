@@ -85,6 +85,68 @@ func (p *Plugin) generateDockerFiles(apps []*AppRun, opts *RunOptions) error {
 	return nil
 }
 
+func (p *Plugin) runCommand(ctx context.Context, cmdStr string, env []string) error {
+	cmd := plugin_util.NewCmdAsUser(cmdStr)
+
+	cmd.Env = append(os.Environ(), env...)
+	cmd.Dir = p.env.ProjectPath()
+
+	stdoutPipe, err := cmd.StdoutPipe()
+	if err != nil {
+		return err
+	}
+
+	stderrPipe, err := cmd.StderrPipe()
+	if err != nil {
+		return err
+	}
+
+	err = cmd.Start()
+	if err != nil {
+		return err
+	}
+
+	// Process stdout and stderr.
+	var wg sync.WaitGroup
+
+	wg.Add(2)
+
+	go func() {
+		s := bufio.NewScanner(stdoutPipe)
+
+		for s.Scan() {
+			p.log.Infoln(s.Text())
+		}
+
+		wg.Done()
+	}()
+
+	go func() {
+		s := bufio.NewScanner(stderrPipe)
+		for s.Scan() {
+			p.log.Infoln(s.Text())
+		}
+
+		wg.Done()
+	}()
+
+	go func() {
+		<-ctx.Done()
+
+		_ = cmd.Process.Signal(syscall.SIGINT)
+
+		go func() {
+			time.Sleep(commandCleanupTimeout)
+
+			_ = cmd.Process.Signal(syscall.SIGKILL)
+		}()
+	}()
+
+	wg.Wait()
+
+	return nil
+}
+
 func (p *Plugin) RunInteractive(ctx context.Context, r *plugin_go.RunRequest, stream *plugin_go.ReceiverStream) error {
 	opts := &RunOptions{}
 	if err := opts.Decode(r.Args); err != nil {
@@ -108,7 +170,7 @@ func (p *Plugin) RunInteractive(ctx context.Context, r *plugin_go.RunRequest, st
 	for i, app := range apps {
 		envPrefix := app.EnvPrefix()
 
-		for k, v := range app.Env {
+		for k, v := range app.AppRun.Env {
 			if strings.HasPrefix(k, envPrefix) {
 				commonEnv = append(commonEnv, fmt.Sprintf("%s=%s", k, v))
 			}
@@ -118,8 +180,22 @@ func (p *Plugin) RunInteractive(ctx context.Context, r *plugin_go.RunRequest, st
 		appMatchers[i] = regexp.MustCompile(fmt.Sprintf(`^%s(_\d)?\s+\|\s`, app.Name()))
 	}
 
+	// Run docker-compose build if needed.
+	if opts.Rebuild {
+		cmdStr := fmt.Sprintf("%s -f %s build", p.dockerComposeCmd, strings.Join(dockerComposeFiles, "-f "))
+
+		if opts.NoCache {
+			cmdStr += " --no-cache"
+		}
+
+		err = p.runCommand(ctx, cmdStr, commonEnv)
+		if err != nil {
+			return err
+		}
+	}
+
 	// Run combined docker-compose.
-	cmdStr := fmt.Sprintf("%s -f %s up", p.dockerComposeCmd, strings.Join(dockerComposeFiles, "-f "))
+	cmdStr := fmt.Sprintf("%s -f %s up --no-color", p.dockerComposeCmd, strings.Join(dockerComposeFiles, "-f "))
 	cmd := plugin_util.NewCmdAsUser(cmdStr)
 
 	cmd.Env = append(os.Environ(), commonEnv...)
@@ -131,11 +207,6 @@ func (p *Plugin) RunInteractive(ctx context.Context, r *plugin_go.RunRequest, st
 	}
 
 	stderrPipe, err := cmd.StderrPipe()
-	if err != nil {
-		return err
-	}
-
-	err = stream.Send(&plugin_go.RunningResponse{})
 	if err != nil {
 		return err
 	}
@@ -189,6 +260,11 @@ func (p *Plugin) RunInteractive(ctx context.Context, r *plugin_go.RunRequest, st
 			_ = cmd.Process.Signal(syscall.SIGKILL)
 		}()
 	}()
+
+	err = stream.Send(&plugin_go.RunningResponse{})
+	if err != nil {
+		return err
+	}
 
 	wg.Wait()
 
