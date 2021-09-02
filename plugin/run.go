@@ -89,7 +89,7 @@ func (p *Plugin) runCommand(ctx context.Context, cmdStr string, env []string) er
 	cmd := plugin_util.NewCmdAsUser(cmdStr)
 
 	cmd.Env = append(os.Environ(), env...)
-	cmd.Dir = p.env.ProjectPath()
+	cmd.Dir = p.env.ProjectDir()
 
 	stdoutPipe, err := cmd.StdoutPipe()
 	if err != nil {
@@ -199,7 +199,7 @@ func (p *Plugin) RunInteractive(ctx context.Context, r *plugin_go.RunRequest, st
 	cmd := plugin_util.NewCmdAsUser(cmdStr)
 
 	cmd.Env = append(os.Environ(), commonEnv...)
-	cmd.Dir = p.env.ProjectPath()
+	cmd.Dir = p.env.ProjectDir()
 
 	stdoutPipe, err := cmd.StdoutPipe()
 	if err != nil {

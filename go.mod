@@ -15,7 +15,7 @@ require (
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/moby/term v0.0.0-20210619224110-3f7ff695adc6 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
-	github.com/outblocks/outblocks-plugin-go v0.0.0-20210901140907-fc2a794cc51a
+	github.com/outblocks/outblocks-plugin-go v0.0.0-20210902144651-b40b54674bbb
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac // indirect
 	google.golang.org/grpc v1.39.0 // indirect
