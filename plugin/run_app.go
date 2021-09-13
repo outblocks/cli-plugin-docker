@@ -34,8 +34,8 @@ type AppRun struct {
 }
 
 func detectAppType(app *types.AppRun) AppType {
-	if plugin_util.FileExists(filepath.Join(app.Dir, "package.json")) {
-		if plugin_util.FileExists(filepath.Join(app.Dir, "yarn.lock")) {
+	if plugin_util.FileExists(filepath.Join(app.App.Dir, "package.json")) {
+		if plugin_util.FileExists(filepath.Join(app.App.Dir, "yarn.lock")) {
 			return AppTypeNodeYarn
 		}
 
@@ -74,11 +74,11 @@ func (a *AppRun) Dockerfile() string {
 }
 
 func (a *AppRun) DockerfilePath() string {
-	return filepath.Join(a.Dir, AppRunDockerfile)
+	return filepath.Join(a.App.Dir, AppRunDockerfile)
 }
 
 func (a *AppRun) DockerComposePath() string {
-	return filepath.Join(a.Dir, AppRunDockerCompose)
+	return filepath.Join(a.App.Dir, AppRunDockerCompose)
 }
 
 func (a *AppRun) Volumes() map[string]string {
