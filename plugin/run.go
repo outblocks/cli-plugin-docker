@@ -168,7 +168,7 @@ func (p *Plugin) RunInteractive(ctx context.Context, r *plugin_go.RunRequest, st
 	appMatchers := make([]*regexp.Regexp, len(apps))
 
 	for i, app := range apps {
-		envPrefix := app.EnvPrefix()
+		envPrefix := app.App.EnvPrefix()
 
 		for k, v := range app.AppRun.Env {
 			if strings.HasPrefix(k, envPrefix) {

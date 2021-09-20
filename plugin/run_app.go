@@ -88,7 +88,7 @@ func (a *AppRun) Volumes() map[string]string {
 }
 
 func (a *AppRun) Env() map[string]string {
-	prefix := a.EnvPrefix()
+	prefix := a.App.EnvPrefix()
 	m := make(map[string]string)
 
 	for k, v := range a.AppRun.Env {
