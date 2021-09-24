@@ -1,8 +1,17 @@
 # Outblocks Docker Plugin Changelog
 
+## [v0.1.5](https://github.com/outblocks/cli-plugin-docker/compare/v0.1.4...v0.1.5)
+
+> 2021-09-24
+
+### FEATURES
+
+[`aedfe59`](https://github.com/outblocks/cli-plugin-docker/commit/aedfe592651abaf2b1bc22f7db8ca04241971686) docker_command support, regenerate compose, fix for chown
+
+
 ## [v0.1.4](https://github.com/outblocks/cli-plugin-docker/compare/v0.1.3...v0.1.4)
 
-> 2021-09-20
+> 2021-09-21
 
 ### FEATURES
 
