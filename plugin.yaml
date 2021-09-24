@@ -12,7 +12,7 @@ commands:
     args:
       - name: docker-regenerate
         type: bool
-        usage: Regenerate dockerfile and docker-compose files.
+        usage: Regenerate dockerfiles.
       - name: docker-rebuild
         type: bool
         usage: Rebuild docker images.

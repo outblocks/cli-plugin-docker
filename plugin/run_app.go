@@ -8,6 +8,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/mitchellh/mapstructure"
 	"github.com/outblocks/cli-plugin-docker/templates"
 	plugin_go "github.com/outblocks/outblocks-plugin-go"
 	"github.com/outblocks/outblocks-plugin-go/types"
@@ -27,10 +28,19 @@ const (
 	AppTypeNodeYarn
 )
 
-type AppRun struct {
+type AppRunInfo struct {
 	*types.AppRun
-	Hosts map[string]string
-	Type  AppType
+	Hosts   map[string]string
+	Type    AppType
+	Options *AppRunOptions
+}
+
+type AppRunOptions struct {
+	DockerCommand string `mapstructure:"docker_command"`
+}
+
+func (o *AppRunOptions) Decode(in interface{}) error {
+	return mapstructure.Decode(in, o)
 }
 
 func detectAppType(app *types.AppRun) AppType {
@@ -45,49 +55,55 @@ func detectAppType(app *types.AppRun) AppType {
 	return AppTypeUnknown
 }
 
-func NewAppInfo(app *types.AppRun, hosts map[string]string) (*AppRun, error) {
-	return &AppRun{
-		AppRun: app,
-		Hosts:  hosts,
-		Type:   detectAppType(app),
+func NewAppRunInfo(app *types.AppRun, hosts map[string]string) (*AppRunInfo, error) {
+	opts := &AppRunOptions{}
+	if err := opts.Decode(app.Properties); err != nil {
+		return nil, err
+	}
+
+	return &AppRunInfo{
+		AppRun:  app,
+		Hosts:   hosts,
+		Type:    detectAppType(app),
+		Options: opts,
 	}, nil
 }
 
-func (a *AppRun) SanitizedAppName() string {
+func (a *AppRunInfo) SanitizedAppName() string {
 	return plugin_util.LimitString(plugin_util.SanitizeName(a.App.Name), 51)
 }
 
-func (a *AppRun) Name() string {
+func (a *AppRunInfo) Name() string {
 	return fmt.Sprintf("%s_%s", a.App.Type, a.SanitizedAppName())
 }
 
-func (a *AppRun) DockerPath() string {
+func (a *AppRunInfo) DockerPath() string {
 	return "/app"
 }
 
-func (a *AppRun) WorkDir() string {
+func (a *AppRunInfo) WorkDir() string {
 	return "/app"
 }
 
-func (a *AppRun) Dockerfile() string {
+func (a *AppRunInfo) Dockerfile() string {
 	return "Dockerfile.dev"
 }
 
-func (a *AppRun) DockerfilePath() string {
+func (a *AppRunInfo) DockerfilePath() string {
 	return filepath.Join(a.App.Dir, AppRunDockerfile)
 }
 
-func (a *AppRun) DockerComposePath() string {
+func (a *AppRunInfo) DockerComposePath() string {
 	return filepath.Join(a.App.Dir, AppRunDockerCompose)
 }
 
-func (a *AppRun) Volumes() map[string]string {
+func (a *AppRunInfo) Volumes() map[string]string {
 	return map[string]string{
 		a.Name() + "_node_modules": a.DockerPath() + "/node_modules",
 	}
 }
 
-func (a *AppRun) Env() map[string]string {
+func (a *AppRunInfo) Env() map[string]string {
 	prefix := a.App.EnvPrefix()
 	m := make(map[string]string)
 
@@ -102,19 +118,24 @@ func (a *AppRun) Env() map[string]string {
 	return m
 }
 
-func (a *AppRun) DockerCommand() string {
+func (a *AppRunInfo) DockerCommand() string {
+	cmd := a.Options.DockerCommand
+	if cmd == "" {
+		cmd = a.Command
+	}
+
 	switch a.Type {
 	case AppTypeNodeYarn:
-		return fmt.Sprintf("yarn install && %s", a.Command)
+		return fmt.Sprintf("yarn install && %s", cmd)
 	case AppTypeNodeNPM:
-		return fmt.Sprintf("npm install && %s", a.Command)
+		return fmt.Sprintf("npm install && %s", cmd)
 	case AppTypeUnknown:
 	}
 
-	return a.Command
+	return cmd
 }
 
-func (a *AppRun) DockerfileYAML() ([]byte, error) {
+func (a *AppRunInfo) DockerfileYAML() ([]byte, error) {
 	var (
 		dockerfileYAML bytes.Buffer
 		templ          *template.Template
@@ -132,7 +153,7 @@ func (a *AppRun) DockerfileYAML() ([]byte, error) {
 	return dockerfileYAML.Bytes(), err
 }
 
-func matchAppOutput(appMatchers []*regexp.Regexp, apps []*AppRun, t string) *plugin_go.RunOutputResponse {
+func matchAppOutput(appMatchers []*regexp.Regexp, apps []*AppRunInfo, t string) *plugin_go.RunOutputResponse {
 	for i, m := range appMatchers {
 		idx := m.FindStringIndex(t)
 		if idx != nil {

@@ -24,7 +24,7 @@ func NewPlugin(logger log.Logger, enver env.Enver) *Plugin {
 
 func (p *Plugin) Handler() *plugin_go.ReqHandler {
 	return &plugin_go.ReqHandler{
-		Init:           p.Init,
+		ProjectInit:    p.ProjetInit,
 		Start:          p.Start,
 		RunInteractive: p.RunInteractive,
 	}

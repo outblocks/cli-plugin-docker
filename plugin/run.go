@@ -33,13 +33,13 @@ func (o *RunOptions) Decode(in interface{}) error {
 	return mapstructure.Decode(in, o)
 }
 
-func (p *Plugin) prepareApps(apps []*types.AppRun, hosts map[string]string) ([]*AppRun, error) {
-	appInfos := make([]*AppRun, len(apps))
+func (p *Plugin) prepareApps(apps []*types.AppRun, hosts map[string]string) ([]*AppRunInfo, error) {
+	appInfos := make([]*AppRunInfo, len(apps))
 
 	var err error
 
 	for i, app := range apps {
-		appInfos[i], err = NewAppInfo(app, hosts)
+		appInfos[i], err = NewAppRunInfo(app, hosts)
 		if err != nil {
 			return nil, err
 		}
@@ -48,24 +48,22 @@ func (p *Plugin) prepareApps(apps []*types.AppRun, hosts map[string]string) ([]*
 	return appInfos, nil
 }
 
-func (p *Plugin) generateDockerFiles(apps []*AppRun, opts *RunOptions) error {
+func (p *Plugin) generateDockerFiles(apps []*AppRunInfo, opts *RunOptions) error {
 	for _, app := range apps {
 		dockerComposePath := app.DockerComposePath()
 		dockerfilePath := app.DockerfilePath()
 
 		// Generate docker compose.
-		if !plugin_util.FileExists(dockerComposePath) || opts.Regenerate {
-			var dockerComposeYAML bytes.Buffer
+		var dockerComposeYAML bytes.Buffer
 
-			err := templates.DockerComposeAppTemplate().Execute(&dockerComposeYAML, app)
-			if err != nil {
-				return err
-			}
+		err := templates.DockerComposeAppTemplate().Execute(&dockerComposeYAML, app)
+		if err != nil {
+			return err
+		}
 
-			err = plugin_util.WriteFile(dockerComposePath, dockerComposeYAML.Bytes(), 0644)
-			if err != nil {
-				return err
-			}
+		err = plugin_util.WriteFile(dockerComposePath, dockerComposeYAML.Bytes(), 0644)
+		if err != nil {
+			return err
 		}
 
 		// Generate dockerfile.

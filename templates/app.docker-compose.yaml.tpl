@@ -11,7 +11,7 @@ services:
     command: sh -c "{{.DockerCommand }}"
     working_dir: {{.WorkDir}}
     ports:
-      - ${{`{`}}{{.EnvPrefix}}_PORT}:${{`{`}}{{.EnvPrefix}}_PORT}
+      - {{.Port}}:{{.Port}}
 
     environment:
 {{.Env | toYaml | indent 6}}
