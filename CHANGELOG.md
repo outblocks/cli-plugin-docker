@@ -1,5 +1,14 @@
 # Outblocks Docker Plugin Changelog
 
+## [v0.1.6](https://github.com/outblocks/cli-plugin-docker/compare/v0.1.5...v0.1.6)
+
+> 2021-09-29
+
+### BUG FIXES
+
+[`73d8838`](https://github.com/outblocks/cli-plugin-docker/commit/73d8838477adff19f6d2ea7a051d12130c364521) better error info
+
+
 ## [v0.1.5](https://github.com/outblocks/cli-plugin-docker/compare/v0.1.4...v0.1.5)
 
 > 2021-09-24
