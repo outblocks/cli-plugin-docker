@@ -145,7 +145,7 @@ func (a *AppRunInfo) DockerfileYAML() ([]byte, error) {
 	case AppTypeNodeNPM, AppTypeNodeYarn:
 		templ = templates.DockerfileAppNodeTemplate()
 	case AppTypeUnknown:
-		return nil, fmt.Errorf("unsupported app for dockerfile generation")
+		return nil, fmt.Errorf("unsupported app for dockerfile generation\nsupports: npm and yarn based node apps\ncreate dockerfile manually")
 	}
 
 	err := templ.Execute(&dockerfileYAML, a)
