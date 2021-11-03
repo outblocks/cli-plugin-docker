@@ -168,7 +168,7 @@ func (p *Plugin) RunInteractive(ctx context.Context, r *plugin_go.RunRequest, st
 	for i, app := range apps {
 		envPrefix := app.App.EnvPrefix()
 
-		for k, v := range app.AppRun.Env {
+		for k, v := range app.AppRun.App.Env {
 			if strings.HasPrefix(k, envPrefix) {
 				commonEnv = append(commonEnv, fmt.Sprintf("%s=%s", k, v))
 			}

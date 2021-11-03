@@ -57,7 +57,7 @@ func detectAppType(app *types.AppRun) AppType {
 
 func NewAppRunInfo(app *types.AppRun, hosts map[string]string) (*AppRunInfo, error) {
 	opts := &AppRunOptions{}
-	if err := opts.Decode(app.Properties); err != nil {
+	if err := opts.Decode(app.App.Properties); err != nil {
 		return nil, err
 	}
 
@@ -107,7 +107,7 @@ func (a *AppRunInfo) Env() map[string]string {
 	prefix := a.App.EnvPrefix()
 	m := make(map[string]string)
 
-	for k, v := range a.AppRun.Env {
+	for k, v := range a.AppRun.App.Env {
 		if strings.HasPrefix(k, prefix) {
 			continue
 		}
