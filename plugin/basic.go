@@ -5,7 +5,9 @@ import (
 	"fmt"
 
 	"github.com/outblocks/cli-plugin-docker/internal/config"
-	plugin_go "github.com/outblocks/outblocks-plugin-go"
+	"github.com/outblocks/outblocks-plugin-go/env"
+	apiv1 "github.com/outblocks/outblocks-plugin-go/gen/api/v1"
+	"github.com/outblocks/outblocks-plugin-go/log"
 	plugin_util "github.com/outblocks/outblocks-plugin-go/util"
 )
 
@@ -23,7 +25,19 @@ func (p *Plugin) findDockerComposeCmd() string {
 	return ""
 }
 
-func (p *Plugin) Start(ctx context.Context, r *plugin_go.StartRequest) (plugin_go.Response, error) {
+func (p *Plugin) Init(ctx context.Context, e env.Enver, l log.Logger, cli apiv1.HostServiceClient) error {
+	p.env = e
+	p.hostCli = cli
+	p.log = l
+
+	return nil
+}
+
+func (p *Plugin) ProjectInit(ctx context.Context, r *apiv1.ProjectInitRequest) (*apiv1.ProjectInitResponse, error) {
+	return &apiv1.ProjectInitResponse{}, nil
+}
+
+func (p *Plugin) Start(ctx context.Context, r *apiv1.StartRequest) (*apiv1.StartResponse, error) {
 	var err error
 
 	// Check docker connection.
@@ -42,5 +56,5 @@ func (p *Plugin) Start(ctx context.Context, r *plugin_go.StartRequest) (plugin_g
 		return nil, fmt.Errorf("docker-compose not found")
 	}
 
-	return &plugin_go.EmptyResponse{}, nil
+	return &apiv1.StartResponse{}, nil
 }

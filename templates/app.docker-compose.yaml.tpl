@@ -8,15 +8,19 @@ services:
     build:
       context: .
       dockerfile: {{.Dockerfile}}
+{{- if .DockerCommand }}
     command: sh -c "{{.DockerCommand }}"
+{{ end }}
+{{- if .WorkDir }}
     working_dir: {{.WorkDir}}
+{{ end }}
     ports:
-      - {{.Port}}:{{.Port}}
+      - {{.Port}}:{{.ContainerPort}}
 
     environment:
 {{.Env | toYaml | indent 6}}
     volumes:
-      - .:{{.DockerPath | default "/app"}}
+      - .:{{.DockerPath | default "/devapp"}}
 {{- range $key, $value := .Volumes }}
       - {{ $key }}:{{ $value }}
 {{- end }}

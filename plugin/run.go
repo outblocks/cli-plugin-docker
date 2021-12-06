@@ -14,7 +14,7 @@ import (
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/outblocks/cli-plugin-docker/templates"
-	plugin_go "github.com/outblocks/outblocks-plugin-go"
+	apiv1 "github.com/outblocks/outblocks-plugin-go/gen/api/v1"
 	"github.com/outblocks/outblocks-plugin-go/types"
 	plugin_util "github.com/outblocks/outblocks-plugin-go/util"
 )
@@ -29,11 +29,11 @@ type RunOptions struct {
 	Regenerate bool `mapstructure:"docker-regenerate"`
 }
 
-func (o *RunOptions) Decode(in interface{}) error {
+func (o *RunOptions) Decode(in map[string]interface{}) error {
 	return mapstructure.Decode(in, o)
 }
 
-func (p *Plugin) prepareApps(apps []*types.AppRun, hosts map[string]string) ([]*AppRunInfo, error) {
+func (p *Plugin) prepareApps(apps []*apiv1.AppRun, hosts map[string]string) ([]*AppRunInfo, error) {
 	appInfos := make([]*AppRunInfo, len(apps))
 
 	var err error
@@ -67,6 +67,10 @@ func (p *Plugin) generateDockerFiles(apps []*AppRunInfo, opts *RunOptions) error
 		}
 
 		// Generate dockerfile.
+		if app.Type == AppTypeUnknown && plugin_util.FileExists(dockerfilePath) {
+			return nil
+		}
+
 		if !plugin_util.FileExists(dockerfilePath) || opts.Regenerate {
 			dockerfileYAML, err := app.DockerfileYAML()
 			if err != nil {
@@ -144,10 +148,11 @@ func (p *Plugin) runCommand(ctx context.Context, cmdStr string, env []string) er
 
 	return nil
 }
+func (p *Plugin) Run(r *apiv1.RunRequest, stream apiv1.RunPluginService_RunServer) error {
+	ctx := stream.Context()
 
-func (p *Plugin) RunInteractive(ctx context.Context, r *plugin_go.RunRequest, stream *plugin_go.ReceiverStream) error {
 	opts := &RunOptions{}
-	if err := opts.Decode(r.Args); err != nil {
+	if err := opts.Decode(r.Args.AsMap()); err != nil {
 		return err
 	}
 
@@ -166,7 +171,7 @@ func (p *Plugin) RunInteractive(ctx context.Context, r *plugin_go.RunRequest, st
 	appMatchers := make([]*regexp.Regexp, len(apps))
 
 	for i, app := range apps {
-		envPrefix := app.App.EnvPrefix()
+		envPrefix := types.AppEnvPrefix(app.App)
 
 		for k, v := range app.AppRun.App.Env {
 			if strings.HasPrefix(k, envPrefix) {
@@ -175,7 +180,7 @@ func (p *Plugin) RunInteractive(ctx context.Context, r *plugin_go.RunRequest, st
 		}
 
 		dockerComposeFiles[i] = app.DockerComposePath()
-		appMatchers[i] = regexp.MustCompile(fmt.Sprintf(`^%s(_\d)?\s+\|\s`, app.Name()))
+		appMatchers[i] = regexp.MustCompile(fmt.Sprintf(`^(%s-)?%s([-_]\d)?\s+\|\s`, app.App.Name, app.Name()))
 	}
 
 	// Run docker-compose build if needed.
@@ -227,7 +232,11 @@ func (p *Plugin) RunInteractive(ctx context.Context, r *plugin_go.RunRequest, st
 
 			out := matchAppOutput(appMatchers, apps, t)
 			if out != nil {
-				_ = stream.Send(out)
+				_ = stream.Send(&apiv1.RunResponse{
+					Response: &apiv1.RunResponse_Output{
+						Output: out,
+					},
+				})
 
 				continue
 			}
@@ -252,14 +261,17 @@ func (p *Plugin) RunInteractive(ctx context.Context, r *plugin_go.RunRequest, st
 
 		_ = cmd.Process.Signal(syscall.SIGINT)
 
-		go func() {
-			time.Sleep(commandCleanupTimeout)
+		time.Sleep(commandCleanupTimeout)
 
-			_ = cmd.Process.Signal(syscall.SIGKILL)
-		}()
+		_ = cmd.Process.Kill()
+		_ = cmd.Wait()
 	}()
 
-	err = stream.Send(&plugin_go.RunningResponse{})
+	err = stream.Send(&apiv1.RunResponse{
+		Response: &apiv1.RunResponse_Start{
+			Start: &apiv1.RunStartResponse{},
+		},
+	})
 	if err != nil {
 		return err
 	}

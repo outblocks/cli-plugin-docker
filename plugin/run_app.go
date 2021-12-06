@@ -10,7 +10,7 @@ import (
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/outblocks/cli-plugin-docker/templates"
-	plugin_go "github.com/outblocks/outblocks-plugin-go"
+	apiv1 "github.com/outblocks/outblocks-plugin-go/gen/api/v1"
 	"github.com/outblocks/outblocks-plugin-go/types"
 	plugin_util "github.com/outblocks/outblocks-plugin-go/util"
 )
@@ -29,21 +29,24 @@ const (
 )
 
 type AppRunInfo struct {
-	*types.AppRun
+	*apiv1.AppRun
 	Hosts   map[string]string
 	Type    AppType
 	Options *AppRunOptions
 }
 
 type AppRunOptions struct {
-	DockerCommand string `mapstructure:"docker_command"`
+	DockerCommand *string                    `mapstructure:"docker_command"`
+	DockerPort    int                        `mapstructure:"docker_port"`
+	DockerWorkdir *string                    `mapstructure:"docker_workdir"`
+	Container     *types.ServiceAppContainer `json:"container"`
 }
 
-func (o *AppRunOptions) Decode(in interface{}) error {
+func (o *AppRunOptions) Decode(in map[string]interface{}) error {
 	return mapstructure.Decode(in, o)
 }
 
-func detectAppType(app *types.AppRun) AppType {
+func detectAppType(app *apiv1.AppRun) AppType {
 	if plugin_util.FileExists(filepath.Join(app.App.Dir, "package.json")) {
 		if plugin_util.FileExists(filepath.Join(app.App.Dir, "yarn.lock")) {
 			return AppTypeNodeYarn
@@ -55,9 +58,9 @@ func detectAppType(app *types.AppRun) AppType {
 	return AppTypeUnknown
 }
 
-func NewAppRunInfo(app *types.AppRun, hosts map[string]string) (*AppRunInfo, error) {
+func NewAppRunInfo(app *apiv1.AppRun, hosts map[string]string) (*AppRunInfo, error) {
 	opts := &AppRunOptions{}
-	if err := opts.Decode(app.App.Properties); err != nil {
+	if err := opts.Decode(app.App.Run.Other.AsMap()); err != nil {
 		return nil, err
 	}
 
@@ -78,15 +81,31 @@ func (a *AppRunInfo) Name() string {
 }
 
 func (a *AppRunInfo) DockerPath() string {
-	return "/app"
+	return "/devapp"
 }
 
 func (a *AppRunInfo) WorkDir() string {
-	return "/app"
+	if a.Options.DockerWorkdir != nil {
+		return *a.Options.DockerWorkdir
+	}
+
+	return "/devapp"
 }
 
 func (a *AppRunInfo) Dockerfile() string {
 	return "Dockerfile.dev"
+}
+
+func (a *AppRunInfo) ContainerPort() int {
+	if a.Options.DockerPort != 0 {
+		return a.Options.DockerPort
+	}
+
+	if a.Options.Container != nil && a.Options.Container.Port != 0 {
+		return a.Options.Container.Port
+	}
+
+	return int(a.Port)
 }
 
 func (a *AppRunInfo) DockerfilePath() string {
@@ -104,7 +123,7 @@ func (a *AppRunInfo) Volumes() map[string]string {
 }
 
 func (a *AppRunInfo) Env() map[string]string {
-	prefix := a.App.EnvPrefix()
+	prefix := types.AppEnvPrefix(a.App)
 	m := make(map[string]string)
 
 	for k, v := range a.AppRun.App.Env {
@@ -119,9 +138,10 @@ func (a *AppRunInfo) Env() map[string]string {
 }
 
 func (a *AppRunInfo) DockerCommand() string {
-	cmd := a.Options.DockerCommand
-	if cmd == "" {
-		cmd = a.Command
+	cmd := a.App.Run.Command
+
+	if a.Options.DockerCommand != nil {
+		cmd = *a.Options.DockerCommand
 	}
 
 	switch a.Type {
@@ -145,7 +165,7 @@ func (a *AppRunInfo) DockerfileYAML() ([]byte, error) {
 	case AppTypeNodeNPM, AppTypeNodeYarn:
 		templ = templates.DockerfileAppNodeTemplate()
 	case AppTypeUnknown:
-		return nil, fmt.Errorf("unsupported app for dockerfile generation\nsupports: npm and yarn based node apps\ncreate dockerfile manually")
+		return nil, fmt.Errorf("%s app '%s': unsupported app for dockerfile generation\nsupports: npm and yarn based node apps\ncreate dockerfile Dockerfile.dev manually", a.App.Type, a.App.Name)
 	}
 
 	err := templ.Execute(&dockerfileYAML, a)
@@ -153,13 +173,13 @@ func (a *AppRunInfo) DockerfileYAML() ([]byte, error) {
 	return dockerfileYAML.Bytes(), err
 }
 
-func matchAppOutput(appMatchers []*regexp.Regexp, apps []*AppRunInfo, t string) *plugin_go.RunOutputResponse {
+func matchAppOutput(appMatchers []*regexp.Regexp, apps []*AppRunInfo, t string) *apiv1.RunOutputResponse {
 	for i, m := range appMatchers {
 		idx := m.FindStringIndex(t)
 		if idx != nil {
-			return &plugin_go.RunOutputResponse{
-				Source:  plugin_go.RunOutpoutSourceApp,
-				ID:      apps[i].App.ID,
+			return &apiv1.RunOutputResponse{
+				Source:  apiv1.RunOutputResponse_SOURCE_APP,
+				Id:      apps[i].App.Id,
 				Name:    apps[i].App.Name,
 				Message: t[idx[1]:],
 			}
