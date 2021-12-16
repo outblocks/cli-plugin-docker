@@ -17,6 +17,7 @@ import (
 	apiv1 "github.com/outblocks/outblocks-plugin-go/gen/api/v1"
 	"github.com/outblocks/outblocks-plugin-go/types"
 	plugin_util "github.com/outblocks/outblocks-plugin-go/util"
+	"github.com/outblocks/outblocks-plugin-go/util/command"
 )
 
 const (
@@ -68,7 +69,7 @@ func (p *Plugin) generateDockerFiles(apps []*AppRunInfo, opts *RunOptions) error
 
 		// Generate dockerfile.
 		if app.Type == AppTypeUnknown && plugin_util.FileExists(dockerfilePath) {
-			return nil
+			continue
 		}
 
 		if !plugin_util.FileExists(dockerfilePath) || opts.Regenerate {
@@ -88,7 +89,7 @@ func (p *Plugin) generateDockerFiles(apps []*AppRunInfo, opts *RunOptions) error
 }
 
 func (p *Plugin) runCommand(ctx context.Context, cmdStr string, env []string) error {
-	cmd := plugin_util.NewCmdAsUser(cmdStr)
+	cmd := command.NewCmdAsUser(cmdStr)
 
 	cmd.Env = append(os.Environ(), env...)
 	cmd.Dir = p.env.ProjectDir()
@@ -180,12 +181,12 @@ func (p *Plugin) Run(r *apiv1.RunRequest, stream apiv1.RunPluginService_RunServe
 		}
 
 		dockerComposeFiles[i] = app.DockerComposePath()
-		appMatchers[i] = regexp.MustCompile(fmt.Sprintf(`^(%s-)?%s([-_]\d)?\s+\|\s`, app.App.Name, app.Name()))
+		appMatchers[i] = regexp.MustCompile(fmt.Sprintf(`^(.*-)?%s([-_]\d)?\s+\|\s`, app.Name()))
 	}
 
 	// Run docker-compose build if needed.
 	if opts.Rebuild {
-		cmdStr := fmt.Sprintf("%s -f %s build", p.dockerComposeCmd, strings.Join(dockerComposeFiles, "-f "))
+		cmdStr := fmt.Sprintf("%s -f %s build", p.dockerComposeCmd, strings.Join(dockerComposeFiles, " -f "))
 
 		if opts.NoCache {
 			cmdStr += " --no-cache"
@@ -198,23 +199,17 @@ func (p *Plugin) Run(r *apiv1.RunRequest, stream apiv1.RunPluginService_RunServe
 	}
 
 	// Run combined docker-compose.
-	cmdStr := fmt.Sprintf("%s -f %s up --no-color", p.dockerComposeCmd, strings.Join(dockerComposeFiles, "-f "))
-	cmd := plugin_util.NewCmdAsUser(cmdStr)
+	cmdStr := fmt.Sprintf("%s -f %s up --no-color --remove-orphans", p.dockerComposeCmd, strings.Join(dockerComposeFiles, " -f "))
 
-	cmd.Env = append(os.Environ(), commonEnv...)
-	cmd.Dir = p.env.ProjectDir()
-
-	stdoutPipe, err := cmd.StdoutPipe()
+	cmd, err := command.New(cmdStr, command.WithDir(p.env.ProjectDir()), command.WithEnv(commonEnv))
 	if err != nil {
 		return err
 	}
 
-	stderrPipe, err := cmd.StderrPipe()
-	if err != nil {
-		return err
-	}
+	stdoutPipe := cmd.Stdout()
+	stderrPipe := cmd.Stderr()
 
-	err = cmd.Start()
+	err = cmd.Run()
 	if err != nil {
 		return err
 	}
@@ -259,11 +254,7 @@ func (p *Plugin) Run(r *apiv1.RunRequest, stream apiv1.RunPluginService_RunServe
 	go func() {
 		<-ctx.Done()
 
-		_ = cmd.Process.Signal(syscall.SIGINT)
-
-		time.Sleep(commandCleanupTimeout)
-
-		_ = cmd.Process.Kill()
+		_ = cmd.Stop(commandCleanupTimeout)
 		_ = cmd.Wait()
 	}()
 

@@ -8,16 +8,16 @@ import (
 	"github.com/outblocks/outblocks-plugin-go/env"
 	apiv1 "github.com/outblocks/outblocks-plugin-go/gen/api/v1"
 	"github.com/outblocks/outblocks-plugin-go/log"
-	plugin_util "github.com/outblocks/outblocks-plugin-go/util"
+	"github.com/outblocks/outblocks-plugin-go/util/command"
 )
 
 func (p *Plugin) findDockerComposeCmd() string {
-	cmd := plugin_util.NewCmdAsUser("docker compose version")
+	cmd := command.NewCmdAsUser("docker compose version")
 	if cmd.Run() == nil {
 		return "docker compose"
 	}
 
-	cmd = plugin_util.NewCmdAsUser("docker-compose version")
+	cmd = command.NewCmdAsUser("docker-compose version")
 	if cmd.Run() == nil {
 		return "docker-compose"
 	}
