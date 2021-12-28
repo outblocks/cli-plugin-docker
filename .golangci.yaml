@@ -24,7 +24,7 @@ linters-settings:
   maligned:
     suggest-new: true
   dupl:
-    threshold: 200
+    threshold: 250
   goconst:
     min-len: 3
     min-occurrences: 3
@@ -40,7 +40,6 @@ linters-settings:
     disabled-checks:
       - whyNoLint
       - commentedOutCode
-      - octalLiteral
 
 linters:
   disable-all: true
@@ -65,7 +64,6 @@ linters:
     - ineffassign
     - misspell
     - nakedret
-    - nestif
     - noctx
     - nolintlint
     - revive
@@ -92,3 +90,4 @@ linters:
     # - gosec
     # - lll
     # - maligned
+    # - nestif

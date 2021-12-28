@@ -62,7 +62,7 @@ func (p *Plugin) generateDockerFiles(apps []*AppRunInfo, opts *RunOptions) error
 			return err
 		}
 
-		err = plugin_util.WriteFile(dockerComposePath, dockerComposeYAML.Bytes(), 0644)
+		err = os.WriteFile(dockerComposePath, dockerComposeYAML.Bytes(), 0o644)
 		if err != nil {
 			return err
 		}
@@ -78,7 +78,7 @@ func (p *Plugin) generateDockerFiles(apps []*AppRunInfo, opts *RunOptions) error
 				return err
 			}
 
-			err = plugin_util.WriteFile(dockerfilePath, dockerfileYAML, 0644)
+			err = os.WriteFile(dockerfilePath, dockerfileYAML, 0o644)
 			if err != nil {
 				return err
 			}
