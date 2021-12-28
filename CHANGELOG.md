@@ -1,5 +1,10 @@
 # Outblocks Docker Plugin Changelog
 
+## [v0.1.14](https://github.com/outblocks/cli-plugin-docker/compare/v0.1.13...v0.1.14)
+
+> 2021-12-28
+
+
 ## [v0.1.13](https://github.com/outblocks/cli-plugin-docker/compare/v0.1.12...v0.1.13)
 
 > 2021-12-16
