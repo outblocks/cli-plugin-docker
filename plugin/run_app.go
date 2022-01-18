@@ -73,7 +73,7 @@ func NewAppRunInfo(app *apiv1.AppRun, hosts map[string]string) (*AppRunInfo, err
 }
 
 func (a *AppRunInfo) SanitizedAppName() string {
-	return plugin_util.LimitString(plugin_util.SanitizeName(a.App.Name), 51)
+	return plugin_util.LimitString(plugin_util.SanitizeName(a.App.Name, false, false), 51)
 }
 
 func (a *AppRunInfo) Name() string {
