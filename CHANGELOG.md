@@ -1,5 +1,14 @@
 # Outblocks Docker Plugin Changelog
 
+## [v0.1.15](https://github.com/outblocks/cli-plugin-docker/compare/v0.1.14...v0.1.15)
+
+> 2022-01-18
+
+### FEATURES
+
+[`c02b802`](https://github.com/outblocks/cli-plugin-docker/commit/c02b802905cd101a2a80de3bef112884cada66c6) sdk update, license update
+
+
 ## [v0.1.14](https://github.com/outblocks/cli-plugin-docker/compare/v0.1.13...v0.1.14)
 
 > 2021-12-28
