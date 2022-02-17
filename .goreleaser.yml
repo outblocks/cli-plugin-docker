@@ -8,6 +8,7 @@ release:
 before:
   hooks:
     - go mod download
+
 builds:
   - binary: docker_plugin
     goos:

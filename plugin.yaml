@@ -9,16 +9,16 @@ actions:
   - run
 commands:
   run:
-    args:
+    flags:
       - name: docker-regenerate
-        type: bool
-        usage: Regenerate dockerfiles.
+        type: boolean
+        usage: Regenerate dockerfiles
       - name: docker-rebuild
-        type: bool
-        usage: Rebuild docker images.
+        type: boolean
+        usage: Rebuild docker images
       - name: docker-no-cache
-        type: bool
-        usage: Skip cache when rebuilding docker images.
+        type: boolean
+        usage: Skip cache when rebuilding docker images
 
 supports:
   - function
