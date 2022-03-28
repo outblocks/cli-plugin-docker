@@ -9,7 +9,10 @@ services:
       context: .
       dockerfile: {{.Dockerfile}}
 {{- if .DockerCommand }}
-    command: sh -c "{{.DockerCommand }}"
+    command: {{.DockerCommand | toJson}}
+{{ end }}
+{{- if .DockerEntrypoint }}
+    entrypoint: {{.DockerEntrypoint | toJson}}
 {{ end }}
 {{- if .WorkDir }}
     working_dir: {{.WorkDir}}

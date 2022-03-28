@@ -8,11 +8,11 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/mitchellh/mapstructure"
 	"github.com/outblocks/cli-plugin-docker/templates"
 	apiv1 "github.com/outblocks/outblocks-plugin-go/gen/api/v1"
 	"github.com/outblocks/outblocks-plugin-go/types"
 	plugin_util "github.com/outblocks/outblocks-plugin-go/util"
+	"github.com/outblocks/outblocks-plugin-go/util/command"
 )
 
 const (
@@ -36,14 +36,15 @@ type AppRunInfo struct {
 }
 
 type AppRunOptions struct {
-	DockerCommand *string                    `mapstructure:"docker_command"`
-	DockerPort    int                        `mapstructure:"docker_port"`
-	DockerWorkdir *string                    `mapstructure:"docker_workdir"`
-	Container     *types.ServiceAppContainer `json:"container"`
+	DockerEntrypoint *command.StringCommand     `json:"docker_entrypoint"`
+	DockerCommand    *command.StringCommand     `json:"docker_command"`
+	DockerPort       int                        `json:"docker_port"`
+	DockerWorkdir    *string                    `json:"docker_workdir"`
+	Container        *types.ServiceAppContainer `json:"container"`
 }
 
 func (o *AppRunOptions) Decode(in map[string]interface{}) error {
-	return mapstructure.Decode(in, o)
+	return plugin_util.MapstructureJSONDecode(in, o)
 }
 
 func detectAppType(app *apiv1.AppRun) AppType {
@@ -137,24 +138,41 @@ func (a *AppRunInfo) Env() map[string]string {
 	return m
 }
 
-func (a *AppRunInfo) DockerCommand() string {
-	cmd := a.App.Run.Command
+func (a *AppRunInfo) DockerCommand() []string {
+	cmd := command.NewStringCommandFromArray(a.App.Run.Command)
 
-	if a.Options.DockerCommand != nil {
-		cmd = *a.Options.DockerCommand
+	if !a.Options.DockerCommand.IsEmpty() {
+		cmd = a.Options.DockerCommand
+	}
+
+	if !a.Options.Container.Command.IsEmpty() {
+		cmd = a.Options.Container.Command
 	}
 
 	switch a.Type {
 	case AppTypeNodeYarn:
-		return fmt.Sprintf("yarn install && %s", cmd)
+		return []string{"sh", "-c", fmt.Sprintf("yarn install && %s", cmd.Flatten())}
 	case AppTypeNodeNPM:
-		return fmt.Sprintf("npm install && %s", cmd)
+		return []string{"sh", "-c", fmt.Sprintf("npm install && %s", cmd.Flatten())}
 	case AppTypeUnknown:
 	}
 
-	return cmd
+	return cmd.ShArray()
 }
 
+func (a *AppRunInfo) DockerEntrypoint() []string {
+	var cmd *command.StringCommand
+
+	if !a.Options.DockerEntrypoint.IsEmpty() {
+		cmd = a.Options.DockerEntrypoint
+	}
+
+	if !a.Options.Container.Entrypoint.IsEmpty() {
+		cmd = a.Options.Container.Entrypoint
+	}
+
+	return cmd.ShArray()
+}
 func (a *AppRunInfo) DockerfileYAML() ([]byte, error) {
 	var (
 		dockerfileYAML bytes.Buffer

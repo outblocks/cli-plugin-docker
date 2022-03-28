@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/exec"
 	"regexp"
 	"strings"
 	"sync"
@@ -199,9 +200,17 @@ func (p *Plugin) Run(r *apiv1.RunRequest, stream apiv1.RunPluginService_RunServe
 	}
 
 	// Run combined docker-compose.
-	cmdStr := fmt.Sprintf("%s -f %s up --no-color --remove-orphans", p.dockerComposeCmd, strings.Join(dockerComposeFiles, " -f "))
+	cmdArgs := []string{}
 
-	cmd, err := command.New(cmdStr, command.WithDir(p.env.ProjectDir()), command.WithEnv(commonEnv))
+	for _, f := range dockerComposeFiles {
+		cmdArgs = append(cmdArgs, "-f", f)
+	}
+
+	cmdArgs = append(cmdArgs, "up", "--no-color", "--remove-orphans")
+
+	cmd, err := command.New(
+		exec.Command(p.dockerComposeCmd, cmdArgs...),
+		command.WithDir(p.env.ProjectDir()), command.WithEnv(commonEnv))
 	if err != nil {
 		return err
 	}
