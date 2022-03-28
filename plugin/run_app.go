@@ -61,7 +61,7 @@ func detectAppType(app *apiv1.AppRun) AppType {
 
 func NewAppRunInfo(app *apiv1.AppRun, hosts map[string]string) (*AppRunInfo, error) {
 	opts := &AppRunOptions{}
-	if err := opts.Decode(app.App.Run.Other.AsMap()); err != nil {
+	if err := opts.Decode(app.Other.AsMap()); err != nil {
 		return nil, err
 	}
 
@@ -139,13 +139,11 @@ func (a *AppRunInfo) Env() map[string]string {
 }
 
 func (a *AppRunInfo) DockerCommand() []string {
-	cmd := command.NewStringCommandFromArray(a.App.Run.Command)
+	cmd := command.NewStringCommandFromArray(a.Command)
 
 	if !a.Options.DockerCommand.IsEmpty() {
 		cmd = a.Options.DockerCommand
-	}
-
-	if !a.Options.Container.Command.IsEmpty() {
+	} else if !a.Options.Container.Command.IsEmpty() {
 		cmd = a.Options.Container.Command
 	}
 
@@ -157,7 +155,7 @@ func (a *AppRunInfo) DockerCommand() []string {
 	case AppTypeUnknown:
 	}
 
-	return cmd.ShArray()
+	return cmd.ArrayOrShell()
 }
 
 func (a *AppRunInfo) DockerEntrypoint() []string {
@@ -165,14 +163,13 @@ func (a *AppRunInfo) DockerEntrypoint() []string {
 
 	if !a.Options.DockerEntrypoint.IsEmpty() {
 		cmd = a.Options.DockerEntrypoint
-	}
-
-	if !a.Options.Container.Entrypoint.IsEmpty() {
+	} else if !a.Options.Container.Entrypoint.IsEmpty() {
 		cmd = a.Options.Container.Entrypoint
 	}
 
-	return cmd.ShArray()
+	return cmd.ArrayOrShell()
 }
+
 func (a *AppRunInfo) DockerfileYAML() ([]byte, error) {
 	var (
 		dockerfileYAML bytes.Buffer

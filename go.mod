@@ -6,12 +6,12 @@ require (
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/docker/docker v20.10.12+incompatible
 	github.com/mitchellh/mapstructure v1.4.3
-	github.com/outblocks/outblocks-plugin-go v0.0.0-20220328120438-d5e9b87cc9fd
+	github.com/outblocks/outblocks-plugin-go v0.0.0-20220328165400-c0288fe91a69
 	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
-	github.com/23doors/go-yaml v1.8.10-0.20220328115725-5f4263177e5e // indirect
+	github.com/23doors/go-yaml v1.9.6-0.20220328165103-15fd217cc309 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/Microsoft/go-winio v0.5.2 // indirect
