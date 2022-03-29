@@ -1,5 +1,15 @@
 # Outblocks Docker Plugin Changelog
 
+## [v0.1.18](https://github.com/outblocks/cli-plugin-docker/compare/v0.1.17...v0.1.18)
+
+> 2022-03-28
+
+### FEATURES
+
+[`5fb32bb`](https://github.com/outblocks/cli-plugin-docker/commit/5fb32bb539c4b98961db3b3d55bcf14b1a1a07f7) support for new proto
+[`a621b66`](https://github.com/outblocks/cli-plugin-docker/commit/a621b66b387b4d789ee16452f6435430c5b59d68) support for docker entrypoint and array commands
+
+
 ## [v0.1.17](https://github.com/outblocks/cli-plugin-docker/compare/v0.1.16...v0.1.17)
 
 > 2022-03-22
