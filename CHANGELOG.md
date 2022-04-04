@@ -1,8 +1,17 @@
 # Outblocks Docker Plugin Changelog
 
+## [v0.1.19](https://github.com/outblocks/cli-plugin-docker/compare/v0.1.18...v0.1.19)
+
+> 2022-04-04
+
+### FEATURES
+
+[`360e514`](https://github.com/outblocks/cli-plugin-docker/commit/360e514897aaa7bc008eb0310b4f18d93ae1db31) update sdk to avoid issues with isempty
+
+
 ## [v0.1.18](https://github.com/outblocks/cli-plugin-docker/compare/v0.1.17...v0.1.18)
 
-> 2022-03-28
+> 2022-03-29
 
 ### FEATURES
 
