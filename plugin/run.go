@@ -32,7 +32,7 @@ type RunOptions struct {
 }
 
 func (o *RunOptions) Decode(in map[string]interface{}) error {
-	return mapstructure.Decode(in, o)
+	return mapstructure.WeakDecode(in, o)
 }
 
 func (p *Plugin) prepareApps(apps []*apiv1.AppRun, hosts map[string]string) ([]*AppRunInfo, error) {
