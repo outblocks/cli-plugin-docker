@@ -61,7 +61,7 @@ func detectAppType(app *apiv1.AppRun) AppType {
 
 func NewAppRunInfo(app *apiv1.AppRun, hosts map[string]string) (*AppRunInfo, error) {
 	opts := &AppRunOptions{}
-	if err := opts.Decode(app.Other.AsMap()); err != nil {
+	if err := opts.Decode(app.Properties.AsMap()); err != nil {
 		return nil, err
 	}
 

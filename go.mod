@@ -6,7 +6,7 @@ require (
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/docker/docker v20.10.17+incompatible
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/outblocks/outblocks-plugin-go v0.0.0-20220607161633-1f493fa6148e
+	github.com/outblocks/outblocks-plugin-go v0.0.0-20220803192450-7744c1c50028
 	gopkg.in/yaml.v2 v2.4.0
 )
 
