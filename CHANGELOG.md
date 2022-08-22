@@ -1,5 +1,15 @@
 # Outblocks Docker Plugin Changelog
 
+## [v0.1.22](https://github.com/outblocks/cli-plugin-docker/compare/v0.1.21...v0.1.22)
+
+> 2022-08-22
+
+### FEATURES
+
+[`afb7ee6`](https://github.com/outblocks/cli-plugin-docker/commit/afb7ee67053a910e1e95cdd80ba85e4f72e2cf86) postgres, mysql and gcs run support
+
+[`26bb250`](https://github.com/outblocks/cli-plugin-docker/commit/26bb250aa0a726b6172b74859ff5cfdda4a0befc) sdk and go updates
+
 ## [v0.1.21](https://github.com/outblocks/cli-plugin-docker/compare/v0.1.20...v0.1.21)
 
 > 2022-08-03
