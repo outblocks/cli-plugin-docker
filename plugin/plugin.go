@@ -14,7 +14,7 @@ type Plugin struct {
 	hostCli apiv1.HostServiceClient
 
 	cli              *dockerclient.Client
-	dockerComposeCmd string
+	dockerComposeCmd []string
 }
 
 func NewPlugin() *Plugin {

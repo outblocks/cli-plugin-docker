@@ -5,9 +5,7 @@ version: "3.9"
 
 services:
   {{.Name}}:
-    build:
-      context: .
-      dockerfile: {{.Dockerfile}}
+    image: {{.DockerImage}}
 {{- if .DockerCommand }}
     command: {{.DockerCommand | toJson}}
 {{ end }}
@@ -20,12 +18,17 @@ services:
     ports:
       - {{.Port}}:{{.ContainerPort}}
 
+{{- if .Env }}
+
     environment:
 {{.Env | toYaml | indent 6}}
+{{- end }}
+
+{{- if .Volumes }}
     volumes:
-      - .:{{.DockerPath | default "/devapp"}}
 {{- range $key, $value := .Volumes }}
       - {{ $key }}:{{ $value }}
+{{- end }}
 {{- end }}
 
 {{- if .Hosts }}

@@ -12,6 +12,9 @@ var (
 	//go:embed app.docker-compose.yaml.tpl
 	DockerComposeApp string
 
+	//go:embed dep.docker-compose.yaml.tpl
+	DockerComposeDependency string
+
 	//go:embed app-node.Dockerfile.tpl
 	DockerfileAppNode string
 )
@@ -44,6 +47,7 @@ func lazyInit(name, tmpl string) func() *template.Template {
 }
 
 var (
-	DockerComposeAppTemplate  = lazyInit("docker_compose:app", DockerComposeApp)
-	DockerfileAppNodeTemplate = lazyInit("dockerfile:app_node", DockerfileAppNode)
+	DockerComposeAppTemplate        = lazyInit("docker_compose:app", DockerComposeApp)
+	DockerComposeDependencyTemplate = lazyInit("docker_compose:dep", DockerComposeDependency)
+	DockerfileAppNodeTemplate       = lazyInit("dockerfile:app_node", DockerfileAppNode)
 )

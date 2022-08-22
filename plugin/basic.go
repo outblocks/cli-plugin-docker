@@ -11,18 +11,18 @@ import (
 	"github.com/outblocks/outblocks-plugin-go/util/command"
 )
 
-func (p *Plugin) findDockerComposeCmd() string {
+func (p *Plugin) findDockerComposeCmd() []string {
 	cmd := command.NewCmdAsUser("docker compose version")
 	if cmd.Run() == nil {
-		return "docker compose"
+		return []string{"docker", "compose"}
 	}
 
 	cmd = command.NewCmdAsUser("docker-compose version")
 	if cmd.Run() == nil {
-		return "docker-compose"
+		return []string{"docker-compose"}
 	}
 
-	return ""
+	return nil
 }
 
 func (p *Plugin) Init(ctx context.Context, e env.Enver, l log.Logger, cli apiv1.HostServiceClient) error {
@@ -52,7 +52,7 @@ func (p *Plugin) Start(ctx context.Context, r *apiv1.StartRequest) (*apiv1.Start
 	}
 
 	p.dockerComposeCmd = p.findDockerComposeCmd()
-	if p.dockerComposeCmd == "" {
+	if p.dockerComposeCmd == nil {
 		return nil, fmt.Errorf("docker-compose not found")
 	}
 

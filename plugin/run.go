@@ -50,7 +50,22 @@ func (p *Plugin) prepareApps(apps []*apiv1.AppRun, hosts map[string]string) ([]*
 	return appInfos, nil
 }
 
-func (p *Plugin) generateDockerFiles(apps []*AppRunInfo, opts *RunOptions) error {
+func (p *Plugin) prepareDependencies(deps []*apiv1.DependencyRun, hosts map[string]string) ([]*DependencyRunInfo, error) {
+	depInfos := make([]*DependencyRunInfo, len(deps))
+
+	var err error
+
+	for i, dep := range deps {
+		depInfos[i], err = NewDependencyRunInfo(dep, hosts, p.env)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return depInfos, nil
+}
+
+func (p *Plugin) generateDockerFiles(apps []*AppRunInfo, deps []*DependencyRunInfo, opts *RunOptions) error {
 	for _, app := range apps {
 		dockerComposePath := app.DockerComposePath()
 		dockerfilePath := app.DockerfilePath()
@@ -83,6 +98,23 @@ func (p *Plugin) generateDockerFiles(apps []*AppRunInfo, opts *RunOptions) error
 			if err != nil {
 				return err
 			}
+		}
+	}
+
+	for _, dep := range deps {
+		dockerComposePath := dep.DockerComposePath()
+
+		// Generate docker compose.
+		var dockerComposeYAML bytes.Buffer
+
+		err := templates.DockerComposeDependencyTemplate().Execute(&dockerComposeYAML, dep)
+		if err != nil {
+			return err
+		}
+
+		err = os.WriteFile(dockerComposePath, dockerComposeYAML.Bytes(), 0o644)
+		if err != nil {
+			return err
 		}
 	}
 
@@ -158,19 +190,27 @@ func (p *Plugin) Run(r *apiv1.RunRequest, stream apiv1.RunPluginService_RunServe
 		return err
 	}
 
+	vars := make(map[string]*apiv1.RunVars)
+
 	apps, err := p.prepareApps(r.Apps, r.Hosts)
 	if err != nil {
 		return err
 	}
 
-	if err := p.generateDockerFiles(apps, opts); err != nil {
+	deps, err := p.prepareDependencies(r.Dependencies, r.Hosts)
+	if err != nil {
+		return err
+	}
+
+	if err := p.generateDockerFiles(apps, deps, opts); err != nil {
 		return err
 	}
 
 	var commonEnv []string
 
-	dockerComposeFiles := make([]string, len(apps))
+	dockerComposeFiles := make([]string, len(apps)+len(deps))
 	appMatchers := make([]*regexp.Regexp, len(apps))
+	depMatchers := make([]*regexp.Regexp, len(deps))
 
 	for i, app := range apps {
 		envPrefix := types.AppEnvPrefix(app.App)
@@ -183,11 +223,18 @@ func (p *Plugin) Run(r *apiv1.RunRequest, stream apiv1.RunPluginService_RunServe
 
 		dockerComposeFiles[i] = app.DockerComposePath()
 		appMatchers[i] = regexp.MustCompile(fmt.Sprintf(`^(.*-)?%s([-_]\d)?\s+\|\s`, app.Name()))
+		vars[app.App.Id] = &apiv1.RunVars{Vars: app.Vars()}
+	}
+
+	for i, dep := range deps {
+		dockerComposeFiles[i] = dep.DockerComposePath()
+		depMatchers[i] = regexp.MustCompile(fmt.Sprintf(`^(.*-)?%s([-_]\d)?\s+\|\s`, dep.Name()))
+		vars[dep.Dependency.Id] = &apiv1.RunVars{Vars: dep.Vars()}
 	}
 
 	// Run docker-compose build if needed.
 	if opts.Rebuild {
-		cmdStr := fmt.Sprintf("%s -f %s build", p.dockerComposeCmd, strings.Join(dockerComposeFiles, " -f "))
+		cmdStr := fmt.Sprintf("%s -f %s build", strings.Join(p.dockerComposeCmd, " "), strings.Join(dockerComposeFiles, " -f "))
 
 		if opts.NoCache {
 			cmdStr += " --no-cache"
@@ -209,7 +256,7 @@ func (p *Plugin) Run(r *apiv1.RunRequest, stream apiv1.RunPluginService_RunServe
 	cmdArgs = append(cmdArgs, "up", "--no-color", "--remove-orphans")
 
 	cmd, err := command.New(
-		exec.Command(p.dockerComposeCmd, cmdArgs...),
+		exec.Command(p.dockerComposeCmd[0], append(p.dockerComposeCmd[1:], cmdArgs...)...),
 		command.WithDir(p.env.ProjectDir()), command.WithEnv(commonEnv))
 	if err != nil {
 		return err
@@ -234,7 +281,7 @@ func (p *Plugin) Run(r *apiv1.RunRequest, stream apiv1.RunPluginService_RunServe
 		for s.Scan() {
 			t := s.Text()
 
-			out := matchAppOutput(appMatchers, apps, t)
+			out := matchOutput(appMatchers, depMatchers, apps, deps, t)
 			if out != nil {
 				_ = stream.Send(&apiv1.RunResponse{
 					Response: &apiv1.RunResponse_Output{
@@ -269,7 +316,9 @@ func (p *Plugin) Run(r *apiv1.RunRequest, stream apiv1.RunPluginService_RunServe
 
 	err = stream.Send(&apiv1.RunResponse{
 		Response: &apiv1.RunResponse_Start{
-			Start: &apiv1.RunStartResponse{},
+			Start: &apiv1.RunStartResponse{
+				Vars: vars,
+			},
 		},
 	})
 	if err != nil {
@@ -277,6 +326,34 @@ func (p *Plugin) Run(r *apiv1.RunRequest, stream apiv1.RunPluginService_RunServe
 	}
 
 	wg.Wait()
+
+	return nil
+}
+
+func matchOutput(appMatchers, depMatchers []*regexp.Regexp, apps []*AppRunInfo, deps []*DependencyRunInfo, t string) *apiv1.RunOutputResponse {
+	for i, m := range appMatchers {
+		idx := m.FindStringIndex(t)
+		if idx != nil {
+			return &apiv1.RunOutputResponse{
+				Source:  apiv1.RunOutputResponse_SOURCE_APP,
+				Id:      apps[i].App.Id,
+				Name:    apps[i].App.Name,
+				Message: t[idx[1]:],
+			}
+		}
+	}
+
+	for i, m := range depMatchers {
+		idx := m.FindStringIndex(t)
+		if idx != nil {
+			return &apiv1.RunOutputResponse{
+				Source:  apiv1.RunOutputResponse_SOURCE_DEPENDENCY,
+				Id:      deps[i].Dependency.Id,
+				Name:    deps[i].Dependency.Name,
+				Message: t[idx[1]:],
+			}
+		}
+	}
 
 	return nil
 }

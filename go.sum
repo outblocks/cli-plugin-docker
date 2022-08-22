@@ -99,8 +99,8 @@ github.com/opencontainers/go-digest v1.0.0 h1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8
 github.com/opencontainers/go-digest v1.0.0/go.mod h1:0JzlMkj0TRzQZfJkVvzbP0HBR3IKzErnv2BNG4W4MAM=
 github.com/opencontainers/image-spec v1.0.3-0.20211202183452-c5a74bcca799 h1:rc3tiVYb5z54aKaDfakKn0dDjIyPpTtszkjuMzyt7ec=
 github.com/opencontainers/image-spec v1.0.3-0.20211202183452-c5a74bcca799/go.mod h1:BtxoFyWECRxE4U/7sNtV5W15zMzWCbyJoFRP3s7yZA0=
-github.com/outblocks/outblocks-plugin-go v0.0.0-20220803192450-7744c1c50028 h1:PjHUEGVTudKUesESpBm9ukAIwvMYvTZTsOpBOQqITGI=
-github.com/outblocks/outblocks-plugin-go v0.0.0-20220803192450-7744c1c50028/go.mod h1:Wnb50otE4YCKHxyxpnJi1G3iYVW5pnTAeLHpo3Mu0Lk=
+github.com/outblocks/outblocks-plugin-go v0.0.0-20220818132903-e1628dcab8fb h1:yr1vjWlH6St2YmiRjZ4oBHsao97Nj6xYQ5Jd6vJEBQQ=
+github.com/outblocks/outblocks-plugin-go v0.0.0-20220818132903-e1628dcab8fb/go.mod h1:avN1f+Lp4odkiQ1k7hDi5IyrC67rCyrWu8nqTIQv46M=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=

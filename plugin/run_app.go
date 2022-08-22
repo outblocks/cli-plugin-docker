@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"text/template"
 
@@ -73,12 +72,12 @@ func NewAppRunInfo(app *apiv1.AppRun, hosts map[string]string) (*AppRunInfo, err
 	}, nil
 }
 
-func (a *AppRunInfo) SanitizedAppName() string {
+func (a *AppRunInfo) SanitizedName() string {
 	return plugin_util.LimitString(plugin_util.SanitizeName(a.App.Name, false, false), 51)
 }
 
 func (a *AppRunInfo) Name() string {
-	return fmt.Sprintf("%s_%s", a.App.Type, a.SanitizedAppName())
+	return fmt.Sprintf("%s_%s", a.App.Type, a.SanitizedName())
 }
 
 func (a *AppRunInfo) DockerPath() string {
@@ -114,7 +113,7 @@ func (a *AppRunInfo) DockerfilePath() string {
 }
 
 func (a *AppRunInfo) DockerComposePath() string {
-	return filepath.Join(a.App.Dir, AppRunDockerCompose)
+	return filepath.Join(a.App.Dir, fmt.Sprintf("%s.%s", a.App.Id, AppRunDockerCompose))
 }
 
 func (a *AppRunInfo) Volumes() map[string]string {
@@ -136,6 +135,10 @@ func (a *AppRunInfo) Env() map[string]string {
 	}
 
 	return m
+}
+
+func (a *AppRunInfo) Vars() map[string]string {
+	return nil
 }
 
 func (a *AppRunInfo) DockerCommand() []string {
@@ -186,20 +189,4 @@ func (a *AppRunInfo) DockerfileYAML() ([]byte, error) {
 	err := templ.Execute(&dockerfileYAML, a)
 
 	return dockerfileYAML.Bytes(), err
-}
-
-func matchAppOutput(appMatchers []*regexp.Regexp, apps []*AppRunInfo, t string) *apiv1.RunOutputResponse {
-	for i, m := range appMatchers {
-		idx := m.FindStringIndex(t)
-		if idx != nil {
-			return &apiv1.RunOutputResponse{
-				Source:  apiv1.RunOutputResponse_SOURCE_APP,
-				Id:      apps[i].App.Id,
-				Name:    apps[i].App.Name,
-				Message: t[idx[1]:],
-			}
-		}
-	}
-
-	return nil
 }
