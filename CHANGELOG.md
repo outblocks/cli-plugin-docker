@@ -1,5 +1,13 @@
 # Outblocks Docker Plugin Changelog
 
+## [v0.1.23](https://github.com/outblocks/cli-plugin-docker/compare/v0.1.22...v0.1.23)
+
+> 2022-08-31
+
+### BUG FIXES
+
+[`2528a8a`](https://github.com/outblocks/cli-plugin-docker/commit/2528a8a99bf3da1906435fbfe2b3e3a8b7753c42) removed function type from supported, updated sdk
+
 ## [v0.1.22](https://github.com/outblocks/cli-plugin-docker/compare/v0.1.21...v0.1.22)
 
 > 2022-08-22
