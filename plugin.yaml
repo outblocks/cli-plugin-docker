@@ -21,7 +21,6 @@ commands:
         usage: Skip cache when rebuilding docker images
 
 supports:
-  - function
   - service
   - static
 supported_types:

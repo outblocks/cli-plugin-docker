@@ -6,7 +6,7 @@ require (
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/docker/docker v20.10.17+incompatible
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/outblocks/outblocks-plugin-go v0.0.0-20220818132903-e1628dcab8fb
+	github.com/outblocks/outblocks-plugin-go v0.0.0-20220830233253-63e9b8cf3c40
 	gopkg.in/yaml.v2 v2.4.0
 )
 
@@ -18,6 +18,7 @@ require (
 	github.com/docker/distribution v2.8.1+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
+	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/uuid v1.3.0 // indirect
