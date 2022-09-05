@@ -1,5 +1,13 @@
 # Outblocks Docker Plugin Changelog
 
+## [v0.1.24](https://github.com/outblocks/cli-plugin-docker/compare/v0.1.23...v0.1.24)
+
+> 2022-09-05
+
+### FEATURES
+
+[`ae441d1`](https://github.com/outblocks/cli-plugin-docker/commit/ae441d1b1a6772e600823e173ae93d2854cceb63) allow to use production setup
+
 ## [v0.1.23](https://github.com/outblocks/cli-plugin-docker/compare/v0.1.22...v0.1.23)
 
 > 2022-08-31
