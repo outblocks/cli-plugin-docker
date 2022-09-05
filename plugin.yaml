@@ -19,6 +19,9 @@ commands:
       - name: docker-no-cache
         type: boolean
         usage: Skip cache when rebuilding docker images
+      - name: docker-production
+        type: boolean
+        usage: Use production images rather than dev ones
 
 supports:
   - service

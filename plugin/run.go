@@ -29,19 +29,20 @@ type RunOptions struct {
 	NoCache    bool `mapstructure:"docker-no-cache"`
 	Rebuild    bool `mapstructure:"docker-rebuild"`
 	Regenerate bool `mapstructure:"docker-regenerate"`
+	Production bool `mapstructure:"docker-production"`
 }
 
 func (o *RunOptions) Decode(in map[string]interface{}) error {
 	return mapstructure.WeakDecode(in, o)
 }
 
-func (p *Plugin) prepareApps(apps []*apiv1.AppRun, hosts map[string]string) ([]*AppRunInfo, error) {
+func (p *Plugin) prepareApps(apps []*apiv1.AppRun, hosts map[string]string, opts *RunOptions) ([]*AppRunInfo, error) {
 	appInfos := make([]*AppRunInfo, len(apps))
 
 	var err error
 
 	for i, app := range apps {
-		appInfos[i], err = NewAppRunInfo(app, hosts)
+		appInfos[i], err = NewAppRunInfo(app, hosts, opts)
 		if err != nil {
 			return nil, err
 		}
@@ -88,7 +89,7 @@ func (p *Plugin) generateDockerFiles(apps []*AppRunInfo, deps []*DependencyRunIn
 			continue
 		}
 
-		if !plugin_util.FileExists(dockerfilePath) || opts.Regenerate {
+		if !plugin_util.FileExists(dockerfilePath) || (opts.Regenerate && !opts.Production) {
 			dockerfileYAML, err := app.DockerfileYAML()
 			if err != nil {
 				return err
@@ -192,7 +193,7 @@ func (p *Plugin) Run(r *apiv1.RunRequest, stream apiv1.RunPluginService_RunServe
 
 	vars := make(map[string]*apiv1.RunVars)
 
-	apps, err := p.prepareApps(r.Apps, r.Hosts)
+	apps, err := p.prepareApps(r.Apps, r.Hosts, opts)
 	if err != nil {
 		return err
 	}

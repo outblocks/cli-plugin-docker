@@ -22,10 +22,11 @@ services:
 
     environment:
 {{.Env | toYaml | indent 6}}
+{{- if .Volumes }}
     volumes:
-      - .:{{.DockerPath | default "/devapp"}}
 {{- range $key, $value := .Volumes }}
       - {{ $key }}:{{ $value }}
+{{- end }}
 {{- end }}
 
 {{- if .Hosts }}

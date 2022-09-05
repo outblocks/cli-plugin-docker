@@ -131,10 +131,6 @@ func (a *DependencyRunInfo) WorkDir() string {
 	return ""
 }
 
-func (a *DependencyRunInfo) Dockerfile() string {
-	return "Dockerfile.dev"
-}
-
 func (a *DependencyRunInfo) ContainerPort() int {
 	if a.Options.DockerPort != 0 {
 		return a.Options.DockerPort

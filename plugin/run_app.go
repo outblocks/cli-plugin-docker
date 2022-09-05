@@ -15,6 +15,7 @@ import (
 )
 
 const (
+	DefaultDockerfile   = "Dockerfile"
 	AppRunDockerfile    = "Dockerfile.dev"
 	AppRunDockerCompose = "docker-compose.outblocks.yaml"
 )
@@ -29,9 +30,10 @@ const (
 
 type AppRunInfo struct {
 	*apiv1.AppRun
-	Hosts   map[string]string
-	Type    AppType
-	Options *AppRunOptions
+	Hosts      map[string]string
+	Type       AppType
+	Options    *AppRunOptions
+	Production bool
 }
 
 type AppRunOptions struct {
@@ -39,6 +41,7 @@ type AppRunOptions struct {
 	DockerCommand    *command.StringCommand     `json:"docker_command"`
 	DockerPort       int                        `json:"docker_port"`
 	DockerWorkdir    *string                    `json:"docker_workdir"`
+	Dockerfile       *string                    `json:"dockerfile"`
 	Container        *types.ServiceAppContainer `json:"container"`
 }
 
@@ -58,17 +61,18 @@ func detectAppType(app *apiv1.AppRun) AppType {
 	return AppTypeUnknown
 }
 
-func NewAppRunInfo(app *apiv1.AppRun, hosts map[string]string) (*AppRunInfo, error) {
+func NewAppRunInfo(app *apiv1.AppRun, hosts map[string]string, runOpts *RunOptions) (*AppRunInfo, error) {
 	opts := &AppRunOptions{}
 	if err := opts.Decode(app.Properties.AsMap()); err != nil {
 		return nil, err
 	}
 
 	return &AppRunInfo{
-		AppRun:  app,
-		Hosts:   hosts,
-		Type:    detectAppType(app),
-		Options: opts,
+		AppRun:     app,
+		Hosts:      hosts,
+		Type:       detectAppType(app),
+		Options:    opts,
+		Production: runOpts.Production,
 	}, nil
 }
 
@@ -80,7 +84,7 @@ func (a *AppRunInfo) Name() string {
 	return fmt.Sprintf("%s_%s", a.App.Type, a.SanitizedName())
 }
 
-func (a *AppRunInfo) DockerPath() string {
+func (a *AppRunInfo) dockerPath() string {
 	return "/devapp"
 }
 
@@ -89,11 +93,23 @@ func (a *AppRunInfo) WorkDir() string {
 		return *a.Options.DockerWorkdir
 	}
 
+	if a.Production {
+		return ""
+	}
+
 	return "/devapp"
 }
 
 func (a *AppRunInfo) Dockerfile() string {
-	return "Dockerfile.dev"
+	if a.Options.Dockerfile != nil {
+		return *a.Options.Dockerfile
+	}
+
+	if a.Production {
+		return DefaultDockerfile
+	}
+
+	return AppRunDockerfile
 }
 
 func (a *AppRunInfo) ContainerPort() int {
@@ -109,7 +125,7 @@ func (a *AppRunInfo) ContainerPort() int {
 }
 
 func (a *AppRunInfo) DockerfilePath() string {
-	return filepath.Join(a.App.Dir, AppRunDockerfile)
+	return filepath.Join(a.App.Dir, a.Dockerfile())
 }
 
 func (a *AppRunInfo) DockerComposePath() string {
@@ -117,9 +133,21 @@ func (a *AppRunInfo) DockerComposePath() string {
 }
 
 func (a *AppRunInfo) Volumes() map[string]string {
-	return map[string]string{
-		a.Name() + "_node_modules": a.DockerPath() + "/node_modules",
+	if a.Production {
+		return nil
 	}
+
+	volumes := map[string]string{
+		".": a.dockerPath(),
+	}
+
+	switch a.Type {
+	case AppTypeNodeNPM, AppTypeNodeYarn:
+		volumes[a.Name()+"_node_modules"] = a.dockerPath() + "/node_modules"
+	case AppTypeUnknown:
+	}
+
+	return volumes
 }
 
 func (a *AppRunInfo) Env() map[string]string {
@@ -148,6 +176,10 @@ func (a *AppRunInfo) DockerCommand() []string {
 		cmd = a.Options.DockerCommand
 	} else if !a.Options.Container.Command.IsEmpty() {
 		cmd = a.Options.Container.Command
+	}
+
+	if a.Production {
+		return cmd.ArrayOrShell()
 	}
 
 	switch a.Type {
