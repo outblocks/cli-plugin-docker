@@ -32,7 +32,7 @@ type RunOptions struct {
 	Production bool `mapstructure:"docker-production"`
 }
 
-func (o *RunOptions) Decode(in map[string]interface{}) error {
+func (o *RunOptions) Decode(in map[string]any) error {
 	return mapstructure.WeakDecode(in, o)
 }
 
@@ -79,7 +79,7 @@ func (p *Plugin) generateDockerFiles(apps []*AppRunInfo, deps []*DependencyRunIn
 			return err
 		}
 
-		err = os.WriteFile(dockerComposePath, dockerComposeYAML.Bytes(), 0o644)
+		err = os.WriteFile(dockerComposePath, dockerComposeYAML.Bytes(), 0o600)
 		if err != nil {
 			return err
 		}
@@ -95,7 +95,7 @@ func (p *Plugin) generateDockerFiles(apps []*AppRunInfo, deps []*DependencyRunIn
 				return err
 			}
 
-			err = os.WriteFile(dockerfilePath, dockerfileYAML, 0o644)
+			err = os.WriteFile(dockerfilePath, dockerfileYAML, 0o600)
 			if err != nil {
 				return err
 			}
@@ -113,7 +113,7 @@ func (p *Plugin) generateDockerFiles(apps []*AppRunInfo, deps []*DependencyRunIn
 			return err
 		}
 
-		err = os.WriteFile(dockerComposePath, dockerComposeYAML.Bytes(), 0o644)
+		err = os.WriteFile(dockerComposePath, dockerComposeYAML.Bytes(), 0o600)
 		if err != nil {
 			return err
 		}
@@ -183,6 +183,7 @@ func (p *Plugin) runCommand(ctx context.Context, cmdStr string, env []string) er
 
 	return nil
 }
+
 func (p *Plugin) Run(r *apiv1.RunRequest, stream apiv1.RunPluginService_RunServer) error {
 	ctx := stream.Context()
 
@@ -257,7 +258,7 @@ func (p *Plugin) Run(r *apiv1.RunRequest, stream apiv1.RunPluginService_RunServe
 	cmdArgs = append(cmdArgs, "up", "--no-color", "--remove-orphans")
 
 	cmd, err := command.New(
-		exec.Command(p.dockerComposeCmd[0], append(p.dockerComposeCmd[1:], cmdArgs...)...),
+		exec.CommandContext(ctx, p.dockerComposeCmd[0], append(p.dockerComposeCmd[1:], cmdArgs...)...), //nolint:gosec
 		command.WithDir(p.env.ProjectDir()), command.WithEnv(commonEnv))
 	if err != nil {
 		return err

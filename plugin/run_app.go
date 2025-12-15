@@ -45,7 +45,7 @@ type AppRunOptions struct {
 	Container        *types.ServiceAppContainer `json:"container"`
 }
 
-func (o *AppRunOptions) Decode(in map[string]interface{}) error {
+func (o *AppRunOptions) Decode(in map[string]any) error {
 	return plugin_util.MapstructureJSONDecode(in, o)
 }
 

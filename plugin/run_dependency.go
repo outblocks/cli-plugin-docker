@@ -42,7 +42,7 @@ type DependencyRunOptions struct {
 	DockerData       string                 `json:"docker_data"`
 }
 
-func (o *DependencyRunOptions) Decode(in map[string]interface{}) error {
+func (o *DependencyRunOptions) Decode(in map[string]any) error {
 	return plugin_util.MapstructureJSONDecode(in, o)
 }
 

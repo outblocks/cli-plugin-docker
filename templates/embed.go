@@ -25,7 +25,7 @@ func funcMap() template.FuncMap {
 	}
 }
 
-func toYaml(v interface{}) string {
+func toYaml(v any) string {
 	data, err := yaml.Marshal(v)
 	if err != nil {
 		return ""
