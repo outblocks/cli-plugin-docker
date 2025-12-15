@@ -1,5 +1,17 @@
 # Outblocks Docker Plugin Changelog
 
+## [v0.1.25](https://github.com/outblocks/cli-plugin-docker/compare/v0.1.24...v0.1.25)
+
+> 2025-12-15
+
+### FEATURES
+
+[`cf38924`](https://github.com/outblocks/cli-plugin-docker/commit/cf389248c9f961fa1645a4b4c2bdffa3c288c8b0) changelog deps updates
+
+[`0552c35`](https://github.com/outblocks/cli-plugin-docker/commit/0552c3550c7e1ba2f307f7b176d73a364c03a763) outblocks plugin go update
+
+[`82a98cd`](https://github.com/outblocks/cli-plugin-docker/commit/82a98cdc78f93d7cf7afcec6b36d033e60e255b9) dependency updates
+
 ## [v0.1.24](https://github.com/outblocks/cli-plugin-docker/compare/v0.1.23...v0.1.24)
 
 > 2022-09-05
