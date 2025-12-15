@@ -1,5 +1,13 @@
 # Outblocks Docker Plugin Changelog
 
+## [v0.1.26](https://github.com/outblocks/cli-plugin-docker/compare/v0.1.25...v0.1.26)
+
+> 2025-12-15
+
+### FEATURES
+
+[`827ded9`](https://github.com/outblocks/cli-plugin-docker/commit/827ded948c5160e6a89c0ab0aad47fdf38f61e82) release flow fix
+
 ## [v0.1.25](https://github.com/outblocks/cli-plugin-docker/compare/v0.1.24...v0.1.25)
 
 > 2025-12-15
